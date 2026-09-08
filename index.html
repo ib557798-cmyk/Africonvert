@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Africonvert</title>
+    <style>
+        :root {
+            --primary: #008080; /* Un vert canard élégant */
+            --bg: #f2f2f7;
+            --card: #ffffff;
+            --text: #1c1c1e;
+            --radius: 16px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .container {
+            padding: 20px;
+            flex: 1;
+        }
+        .converter-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+            color: #8e8e93;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            outline: none;
+            background: var(--bg);
+            transition: border-color 0.2s;
+            width: 50%;
+        }
+        input[type="number"]:focus {
+            border-color: var(--primary);
+            background: #fff;
+        }
+        select {
+            flex: 1;
+            padding: 15px 5px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>Africonvert</header>
+
+    <div class="container">
+        <div class="converter-card">
+            
+            <div class="input-group">
+                <label>Montant de départ</label>
+                <div class="input-row">
+                    <input type="number" id="amountOne" placeholder="0.00" oninput="calculate('one')">
+                    <select id="currencyOne" onchange="calculate('one')">
+                        <option value="EUR">EUR (Euro)</option>
+                        <option value="USD">USD (Dollar US)</option>
+                        <option value="XOF">XOF (CFA Ouest)</option>
+                        <option value="GNF">GNF (Guinée)</option>
+                        <option value="NGN">NGN (Nigeria)</option>
+                        <option value="GHS">GHS (Ghana)</option>
+                        <option value="CVE">CVE (Cap-Vert)</option>
+                        <option value="GMD">GMD (Gambie)</option>
+                        <option value="LRD">LRD (Libéria)</option>
+                        <option value="SLE">SLE (Sierra Leone)</option>
+                        <option value="MRU">MRU (Mauritanie)</option>
+                        <option value="XAF">XAF (CFA Centre)</option>
+                        <option value="ZAR">ZAR (Afrique du Sud)</option>
+                        <option value="MAD">MAD (Maroc)</option>
+                        <option value="KES">KES (Kenya)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Montant converti</label>
+                <div class="input-row">
+                    <input type="number" id="amountTwo" placeholder="0.00" oninput="calculate('two')">
+                    <select id="currencyTwo" onchange="calculate('two')">
+                        <option value="XOF" selected>XOF (CFA Ouest)</option>
+                        <option value="GNF">GNF (Guinée)</option>
+                        <option value="NGN">NGN (Nigeria)</option>
+                        <option value="GHS">GHS (Ghana)</option>
+                        <option value="CVE">CVE (Cap-Vert)</option>
+                        <option value="GMD">GMD (Gambie)</option>
+                        <option value="LRD">LRD (Libéria)</option>
+                        <option value="SLE">SLE (Sierra Leone)</option>
+                        <option value="MRU">MRU (Mauritanie)</option>
+                        <option value="XAF">XAF (CFA Centre)</option>
+                        <option value="ZAR">ZAR (Afrique du Sud)</option>
+                        <option value="MAD">MAD (Maroc)</option>
+                        <option value="KES">KES (Kenya)</option>
+                        <option value="EUR">EUR (Euro)</option>
+                        <option value="USD">USD (Dollar US)</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Taux de change de référence par rapport à l'Euro (1 EUR = ...)
+        // Ces taux sont des estimations statiques pour le fonctionnement hors-ligne.
+        const rates = {
+            EUR: 1,
+            USD: 1.08,
+            XOF: 655.957,
+            XAF: 655.957,
+            GNF: 9400.00,
+            NGN: 1600.00,
+            GHS: 14.50,
+            CVE: 110.26,
+            GMD: 74.00,
+            LRD: 212.00,
+            SLE: 24.50,
+            MRU: 43.00,
+            ZAR: 20.50,
+            MAD: 10.80,
+            KES: 142.00
+        };
+
+        const amountOne = document.getElementById('amountOne');
+        const amountTwo = document.getElementById('amountTwo');
+        const currencyOne = document.getElementById('currencyOne');
+        const currencyTwo = document.getElementById('currencyTwo');
+
+        function calculate(source) {
+            const rateOne = rates[currencyOne.value];
+            const rateTwo = rates[currencyTwo.value];
+
+            if (source === 'one') {
+                if (amountOne.value === '') {
+                    amountTwo.value = '';
+                    return;
+                }
+                const baseAmount = parseFloat(amountOne.value) / rateOne;
+                amountTwo.value = (baseAmount * rateTwo).toFixed(2);
+            } else if (source === 'two') {
+                if (amountTwo.value === '') {
+                    amountOne.value = '';
+                    return;
+                }
+                const baseAmount = parseFloat(amountTwo.value) / rateTwo;
+                amountOne.value = (baseAmount * rateOne).toFixed(2);
+            }
+        }
+    </script>
+</body>
+</html>
